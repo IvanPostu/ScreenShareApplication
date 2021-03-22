@@ -3,17 +3,31 @@ apply plugin: 'jacoco'
 apply plugin: 'application'
 apply plugin: 'eclipse'
 
-
 description = 'Screen share application.'
 group = 'com.ivan.app'
 
 mainClassName = 'com.ivan.app.Main'
 
+version='0.0.1'
 sourceCompatibility = 8
 targetCompatibility = 8
 
 repositories {
   mavenCentral()
+}
+
+task assembleJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'screen-share-application',  
+        	'Implementation-Version': version,
+        	'Main-Class': mainClassName
+    }
+    baseName = project.name + '-all'
+    from { 
+      configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+      // include 'config/**/*.xml'
+    }
+    with jar
 }
 
 test {
