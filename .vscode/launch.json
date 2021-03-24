@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch Sender",
+      "request": "launch",
+      "mainClass": "com.ivan.app.temp.Sender",
+      "projectName": "ScreenShareApplication"
+    },
+    {
+      "type": "java",
+      "name": "Launch Receiver",
+      "request": "launch",
+      "mainClass": "com.ivan.app.temp.Receiver",
+      "projectName": "ScreenShareApplication"
+    },
+    {
+      "type": "java",
       "name": "Debug (Attach)",
       "request": "attach",
       "hostName": "localhost",

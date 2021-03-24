@@ -4,19 +4,12 @@
  */
 package com.ivan.app.view;
 
-import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.swing.Timer;
-import com.ivan.app.screenshare.NetworkSender;
-import com.ivan.app.utils.ImageUtils;
+import java.awt.Graphics;
+import java.io.IOException;
+import com.ivan.app.screenshare.NetworkReceiver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,82 +17,68 @@ import org.apache.logging.log4j.Logger;
  *
  * @author ivan
  */
-public class DynamicShareMyScreenPanel extends javax.swing.JPanel {
+public class DynamicShareScreenReceiverPanel extends javax.swing.JPanel {
 
-    private static final Logger LOG = LogManager.getLogger(DynamicShareMyScreenPanel.class);
-    private static final long serialVersionUID = 1187542582181776233L;
+    private static final Logger LOG = LogManager.getLogger(DynamicShareScreenReceiverPanel.class);
 
-    private Robot robot;
+    private static final long serialVersionUID = 3064811163288249731L;
+
+    private NetworkReceiver networkReceiver;
     private Timer timer;
-    private BufferedImage shareImage;
-    private NetworkSender networkSender;
 
-    public DynamicShareMyScreenPanel(String host, int port) {
-        try {
-            this.robot = new Robot();
-        } catch (AWTException ex) {
-            LOG.error(ex);
-        }
-
+    public DynamicShareScreenReceiverPanel(String host, int port) {
         initComponents();
-        this.timer = new Timer(1000 / 30, e -> {
-            this.timerEvent();
-        });
-        InetAddress address;
 
         try {
-            address = InetAddress.getByName(host);
-            this.networkSender = new NetworkSender(address, port);
+            InetAddress address = InetAddress.getByName(host);
+            this.networkReceiver = new NetworkReceiver(address, port);
         } catch (UnknownHostException e1) {
             LOG.error(e1);
         }
+
+        this.timer = new Timer(1000 / 30, e -> {
+            this.timerEvent();
+        });
+    }
+
+    private void timerEvent() {
+
+        this.repaint();
     }
 
     @Override
     public void addNotify() {
         super.addNotify();
         this.timer.start();
+        try {
+            networkReceiver.run();
+        } catch (IOException e) {
+            LOG.error(e);
+        }
     }
 
     @Override
     public void removeNotify() {
         super.removeNotify();
         this.timer.stop();
-
-    }
-
-    private void timerEvent() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Rectangle r = new Rectangle(screenSize);
-        BufferedImage img = robot.createScreenCapture(r);
-
-
-        this.shareImage = ImageUtils.resize(img, this.getWidth(), this.getHeight());
-
-        byte[] imgBytes = new byte[2];
         try {
-            imgBytes = ImageUtils.toByteArray(img);
+            networkReceiver.close();
         } catch (IOException e) {
             LOG.error(e);
         }
-
-        this.networkSender.sendData(imgBytes);
-        this.repaint();
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (this.shareImage == null) {
+        if (this.networkReceiver == null || this.networkReceiver.getShareImage() == null) {
             return;
         }
 
-        g.drawImage(this.shareImage, 0, 0, this);
+        g.drawImage(this.networkReceiver.getShareImage(), 0, 0, this);
 
     }
-
-
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT
@@ -108,7 +87,7 @@ public class DynamicShareMyScreenPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setBackground(new java.awt.Color(204, 255, 153));
+        setBackground(new java.awt.Color(204, 255, 255));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
