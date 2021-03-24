@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 public class Constants {
 
     public static InetAddress IP() throws UnknownHostException {
-        return InetAddress.getByName("localhost"); // "224.0.0.1"
+        return InetAddress.getByName("224.0.0.1"); // "224.0.0.1"
     }
 
     // "192.168.0.19"

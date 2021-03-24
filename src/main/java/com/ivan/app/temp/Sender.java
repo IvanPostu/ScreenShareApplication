@@ -53,8 +53,8 @@ public class Sender {
         System.out.println("Create socket on address " + Constants.IP().getHostAddress()
                 + " and port " + multiCastPort + ".");
         InetAddress group = Constants.IP();
-        DatagramSocket s = new DatagramSocket();
-        // s.joinGroup(group);
+        DatagramSocket s = new MulticastSocket();
+        ((MulticastSocket) s).joinGroup(group);
 
 
         byte[] start = "START".getBytes(); // 83, 84, 65, 82, 84

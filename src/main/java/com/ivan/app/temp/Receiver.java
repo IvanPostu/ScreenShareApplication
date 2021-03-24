@@ -33,8 +33,8 @@ public class Receiver {
 
         System.out.println("Create socket on address " + IP.getHostAddress() + " and port "
                 + multiCastPort + ".");
-        try (DatagramSocket s = new DatagramSocket(multiCastPort, IP)) {
-            // s.joinGroup(IP);
+        try (DatagramSocket s = new MulticastSocket(multiCastPort)) {
+            ((MulticastSocket) s).joinGroup(IP);
 
             // Receive data
             while (true) {
