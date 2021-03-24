@@ -80,14 +80,29 @@ public class Receiver {
                         fos.write(receivedBytesWithFixedSize);
                     }
 
-                    receivedBytes.clear();
                     continue;
 
-
+                    // try (FileOutputStream fos = new FileOutputStream("q2.png")) {
+                    // fos.write(dataz);
+                    // }
+                    // receivedBytes.clear();
                 }
 
                 receivedBytes.add(buffer);
-
+                // Deserialze object
+                // ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+                // ObjectInputStream ois = new ObjectInputStream(bais);
+                // try {
+                // Object readObject = ois.readObject();
+                // if (readObject instanceof String) {
+                // String message = (String) readObject;
+                // System.out.println("Message is: " + message);
+                // } else {
+                // System.out.println("The received object is not of type String!");
+                // }
+                // } catch (Exception e) {
+                // System.out.println("No object could be read from the received UDP datagram.");
+                // }
 
             }
         }

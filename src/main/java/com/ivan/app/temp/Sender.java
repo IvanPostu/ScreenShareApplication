@@ -30,7 +30,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
 
         // Address
-        String multiCastAddress = "224.0.0.1";
+        String multiCastAddress = "0.0.0.0";
         final int multiCastPort = 52684;
 
         Path path = Paths.get("q1.png");
