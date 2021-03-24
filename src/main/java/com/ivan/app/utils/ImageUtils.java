@@ -38,7 +38,7 @@ public abstract class ImageUtils {
     public static byte[] toByteArray(BufferedImage bi) throws IOException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bi, "jpeg", baos);
+        ImageIO.write(bi, "png", baos);
         baos.flush();
         byte[] bytes = baos.toByteArray();
         baos.close();

@@ -12,10 +12,8 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import javax.swing.Timer;
-import com.ivan.app.screenshare.NetworkSender;
+import com.ivan.app.temp.Sender;
 import com.ivan.app.utils.ImageUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,9 +30,14 @@ public class DynamicShareMyScreenPanel extends javax.swing.JPanel {
     private Robot robot;
     private Timer timer;
     private BufferedImage shareImage;
-    private NetworkSender networkSender;
+    private Sender sender;
+    private String host;
+    private int port;
 
     public DynamicShareMyScreenPanel(String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.sender = new Sender();
         try {
             this.robot = new Robot();
         } catch (AWTException ex) {
@@ -45,14 +48,6 @@ public class DynamicShareMyScreenPanel extends javax.swing.JPanel {
         this.timer = new Timer(1000 / 30, e -> {
             this.timerEvent();
         });
-        InetAddress address;
-
-        try {
-            address = InetAddress.getByName(host);
-            this.networkSender = new NetworkSender(address, port);
-        } catch (UnknownHostException e1) {
-            LOG.error(e1);
-        }
     }
 
     @Override
@@ -79,11 +74,11 @@ public class DynamicShareMyScreenPanel extends javax.swing.JPanel {
         byte[] imgBytes = new byte[2];
         try {
             imgBytes = ImageUtils.toByteArray(img);
+            this.sender.sendImage(imgBytes, host, port);
         } catch (IOException e) {
             LOG.error(e);
         }
 
-        this.networkSender.sendData(imgBytes);
         this.repaint();
     }
 

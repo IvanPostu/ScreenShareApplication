@@ -4,12 +4,12 @@
  */
 package com.ivan.app.view;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import javax.swing.Timer;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import com.ivan.app.screenshare.NetworkReceiver;
+import javax.swing.Timer;
+import com.ivan.app.temp.Receiver;
+import com.ivan.app.utils.ImageUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,19 +22,18 @@ public class DynamicShareScreenReceiverPanel extends javax.swing.JPanel {
     private static final Logger LOG = LogManager.getLogger(DynamicShareScreenReceiverPanel.class);
 
     private static final long serialVersionUID = 3064811163288249731L;
-
-    private NetworkReceiver networkReceiver;
+    private Receiver receiver;
     private Timer timer;
+    private String host;
+    private int port;
+    private BufferedImage image;
 
     public DynamicShareScreenReceiverPanel(String host, int port) {
         initComponents();
 
-        try {
-            InetAddress address = InetAddress.getByName(host);
-            this.networkReceiver = new NetworkReceiver(address, port);
-        } catch (UnknownHostException e1) {
-            LOG.error(e1);
-        }
+        this.host = host;
+        this.port = port;
+        this.receiver = new Receiver();
 
         this.timer = new Timer(1000 / 30, e -> {
             this.timerEvent();
@@ -43,6 +42,20 @@ public class DynamicShareScreenReceiverPanel extends javax.swing.JPanel {
 
     private void timerEvent() {
 
+        if (this.receiver.isReady()) {
+            try {
+                byte[] imgData = receiver.receiveImage(host, port);
+                BufferedImage img = ImageUtils.createImageFromBytes(imgData);
+
+                if (img == null) {
+                    return;
+                }
+                image = ImageUtils.resize(img, this.getWidth(), this.getHeight());
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+        }
+
         this.repaint();
     }
 
@@ -50,33 +63,25 @@ public class DynamicShareScreenReceiverPanel extends javax.swing.JPanel {
     public void addNotify() {
         super.addNotify();
         this.timer.start();
-        try {
-            networkReceiver.run();
-        } catch (IOException e) {
-            LOG.error(e);
-        }
+
     }
 
     @Override
     public void removeNotify() {
         super.removeNotify();
         this.timer.stop();
-        try {
-            networkReceiver.close();
-        } catch (IOException e) {
-            LOG.error(e);
-        }
+
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (this.networkReceiver == null || this.networkReceiver.getShareImage() == null) {
+        if (this.image == null) {
             return;
         }
 
-        g.drawImage(this.networkReceiver.getShareImage(), 0, 0, this);
+        g.drawImage(this.image, 0, 0, this);
 
     }
 

@@ -23,6 +23,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     public MainWindow() {
         initComponents();
+        LOG.debug("MainWindow ctor is called");
 
         this.staticScreenPanel = new StaticScreenPanel();
 

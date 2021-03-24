@@ -1,7 +1,6 @@
 package com.ivan.app.temp;
 
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.StandardProtocolFamily;
@@ -10,60 +9,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
 import java.util.List;
+import com.ivan.app.screenshare.Constants;
 
-/**
- *
- * @author uli
- */
+
 public class Receiver {
+    private boolean ready = true;
 
-    /**
-     * @param args the command line arguments
-     */
-    /*
-     * public static void main(String[] args) throws IOException { // Address // String
-     * multiCastAddress = "224.0.0.1"; final int multiCastPort = Constants.PORT; final int
-     * bufferSize = Constants.BUF_SIZE; // Maximum size of transfer object final List<byte[]>
-     * receivedBytes = new ArrayList<>();
-     * 
-     * // Create Socket // InetAddress group = InetAddress.getByName(multiCastAddress); InetAddress
-     * IP = Constants.IP();
-     * 
-     * System.out.println("Create socket on address " + IP.getHostAddress() + " and port " +
-     * multiCastPort + "."); try (DatagramSocket s = new DatagramSocket(multiCastPort)) { //
-     * ((MulticastSocket) s).joinGroup(IP); s.setSoTimeout(3000);
-     * 
-     * int loopCounter = 0; // Receive data while (true) {
-     * System.out.println("Wating for datagram to be received...");
-     * 
-     * // Create buffer byte[] buffer = new byte[bufferSize];
-     * 
-     * try { s.receive(new DatagramPacket(buffer, bufferSize)); } catch (SocketTimeoutException e) {
-     * char c = 'a'; }
-     * 
-     * System.out.println("Datagram received!");
-     * 
-     * boolean isStart = buffer[0] == 83 && buffer[1] == 84 && buffer[2] == 65 && buffer[3] == 82 &&
-     * buffer[4] == 84;
-     * 
-     * boolean isEnd = buffer[0] == 69 && buffer[1] == 78 && buffer[2] == 68;
-     * 
-     * if (isStart) { continue; }
-     * 
-     * if (isEnd) { saveImageData(buffer, receivedBytes); loopCounter = 0; continue;
-     * 
-     * }
-     * 
-     * loopCounter++; receivedBytes.add(buffer);
-     * 
-     * 
-     * } }
-     * 
-     * 
-     * }
-     */
-
-    private static void saveImageData(byte[] buffer, List<byte[]> receivedBytes)
+    private static byte[] getImageData(byte[] buffer, List<byte[]> receivedBytes)
             throws IOException {
         byte[] intBytes = new byte[4];
         intBytes[0] = buffer[3];
@@ -85,9 +37,7 @@ public class Receiver {
             }
         }
 
-        try (FileOutputStream fos = new FileOutputStream("q2.png")) {
-            fos.write(receivedBytesWithFixedSize);
-        }
+        return receivedBytesWithFixedSize;
 
     }
 
@@ -104,24 +54,25 @@ public class Receiver {
         return bytes;
     }
 
-    public static void main(String[] args) throws IOException {
-        Receiver mr = new Receiver();
+    public byte[] receiveImage(String ip, int port) throws IOException {
+        ready = false;
         List<byte[]> byteArrays = new LinkedList<>();
 
         while (true) {
-            byte[] data = mr.receiveMessage(Constants.HOST, Constants.PORT);
+            byte[] data = this.receiveMessage(ip, port);
             boolean isEnd = data[0] == 69 && data[1] == 78 && data[2] == 68;
             if (isEnd) {
-
-                saveImageData(data, byteArrays);
-                break;
+                ready = true;
+                return getImageData(data, byteArrays);
             }
 
             byteArrays.add(data);
-
         }
 
-        // System.out.println("Message received : " + new String(data));
+    }
+
+    public boolean isReady() {
+        return ready;
     }
 
 }
