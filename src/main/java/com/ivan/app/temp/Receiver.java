@@ -4,6 +4,7 @@ package com.ivan.app.temp;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.nio.ByteBuffer;
@@ -21,17 +22,19 @@ public class Receiver {
      */
     public static void main(String[] args) throws IOException {
         // Address
-        String multiCastAddress = "224.0.0.1";
-        final int multiCastPort = 52684;
+        // String multiCastAddress = "224.0.0.1";
+        final int multiCastPort = Constants.PORT;
         final int bufferSize = 1024 * 2; // Maximum size of transfer object
         final List<byte[]> receivedBytes = new ArrayList<>();
 
         // Create Socket
-        System.out.println("Create socket on address " + multiCastAddress + " and port "
+        // InetAddress group = InetAddress.getByName(multiCastAddress);
+        InetAddress IP = Constants.IP();
+
+        System.out.println("Create socket on address " + IP.getHostAddress() + " and port "
                 + multiCastPort + ".");
-        InetAddress group = InetAddress.getByName(multiCastAddress);
-        try (MulticastSocket s = new MulticastSocket(multiCastPort)) {
-            s.joinGroup(group);
+        try (DatagramSocket s = new DatagramSocket(multiCastPort, IP)) {
+            // s.joinGroup(IP);
 
             // Receive data
             while (true) {
@@ -39,7 +42,7 @@ public class Receiver {
 
                 // Create buffer
                 byte[] buffer = new byte[bufferSize];
-                s.receive(new DatagramPacket(buffer, bufferSize, group, multiCastPort));
+                s.receive(new DatagramPacket(buffer, bufferSize));
                 System.out.println("Datagram received!");
 
                 boolean isStart = buffer[0] == 83 && buffer[1] == 84 && buffer[2] == 65

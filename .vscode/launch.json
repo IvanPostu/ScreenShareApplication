@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch FindNetworkInterfaces",
+      "request": "launch",
+      "mainClass": "com.ivan.app.temp.FindNetworkInterfaces",
+      "projectName": "ScreenShareApplication"
+    },
+    {
+      "type": "java",
       "name": "Launch Sender",
       "request": "launch",
       "mainClass": "com.ivan.app.temp.Sender",

@@ -2,6 +2,7 @@ package com.ivan.app.temp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.nio.ByteBuffer;
@@ -30,8 +31,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
 
         // Address
-        String multiCastAddress = "0.0.0.0";
-        final int multiCastPort = 52684;
+        final int multiCastPort = Constants.PORT;
 
         Path path = Paths.get("q1.png");
         byte[] dataz = Files.readAllBytes(path);
@@ -50,11 +50,11 @@ public class Sender {
         }
 
 
-        System.out.println("Create socket on address " + multiCastAddress + " and port "
-                + multiCastPort + ".");
-        InetAddress group = InetAddress.getByName(multiCastAddress);
-        MulticastSocket s = new MulticastSocket(multiCastPort);
-        s.joinGroup(group);
+        System.out.println("Create socket on address " + Constants.IP().getHostAddress()
+                + " and port " + multiCastPort + ".");
+        InetAddress group = Constants.IP();
+        DatagramSocket s = new DatagramSocket();
+        // s.joinGroup(group);
 
 
         byte[] start = "START".getBytes(); // 83, 84, 65, 82, 84
