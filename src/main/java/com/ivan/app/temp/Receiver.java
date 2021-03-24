@@ -24,7 +24,7 @@ public class Receiver {
         // Address
         // String multiCastAddress = "224.0.0.1";
         final int multiCastPort = Constants.PORT;
-        final int bufferSize = 1024 * 2; // Maximum size of transfer object
+        final int bufferSize = Constants.BUF_SIZE; // Maximum size of transfer object
         final List<byte[]> receivedBytes = new ArrayList<>();
 
         // Create Socket
@@ -36,6 +36,7 @@ public class Receiver {
         try (DatagramSocket s = new MulticastSocket(multiCastPort)) {
             ((MulticastSocket) s).joinGroup(IP);
 
+            int loopCounter = 0;
             // Receive data
             while (true) {
                 System.out.println("Wating for datagram to be received...");
@@ -52,10 +53,6 @@ public class Receiver {
 
                 if (isStart) {
                     continue;
-                    // try (FileOutputStream fos = new FileOutputStream("q2.png")) {
-                    // fos.write(dataz);
-                    // }
-                    // receivedBytes.clear();
                 }
 
                 if (isEnd) {
@@ -83,29 +80,14 @@ public class Receiver {
                         fos.write(receivedBytesWithFixedSize);
                     }
 
+                    loopCounter = 0;
                     continue;
 
-                    // try (FileOutputStream fos = new FileOutputStream("q2.png")) {
-                    // fos.write(dataz);
-                    // }
-                    // receivedBytes.clear();
                 }
 
+                loopCounter++;
                 receivedBytes.add(buffer);
-                // Deserialze object
-                // ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-                // ObjectInputStream ois = new ObjectInputStream(bais);
-                // try {
-                // Object readObject = ois.readObject();
-                // if (readObject instanceof String) {
-                // String message = (String) readObject;
-                // System.out.println("Message is: " + message);
-                // } else {
-                // System.out.println("The received object is not of type String!");
-                // }
-                // } catch (Exception e) {
-                // System.out.println("No object could be read from the received UDP datagram.");
-                // }
+
 
             }
         }

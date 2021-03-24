@@ -11,6 +11,8 @@ public class Constants {
 
     // "192.168.0.19"
 
-    public static final int PORT = 52684;
+    public static final int PORT = 8080;
+
+    public static final int BUF_SIZE = 2048;
 
 }
