@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -74,14 +75,27 @@ public class Sender {
      * }
      */
 
-    public void sendMessage(String ip, String iface, int port, byte[] message) throws IOException {
+    public void sendLargeMessages(String ip, int port, List<byte[]> messages)
+            throws IOException, InterruptedException {
         DatagramChannel datagramChannel = DatagramChannel.open();
         datagramChannel.bind(null);
-        NetworkInterface networkInterface = NetworkInterface.getByName(iface);
-        datagramChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, networkInterface);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(message);
 
         InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);
+
+        Iterator<byte[]> messagesIterator = messages.iterator();
+        while (messagesIterator.hasNext()) {
+            ByteBuffer byteBuffer = ByteBuffer.wrap(messagesIterator.next());
+            datagramChannel.send(byteBuffer, inetSocketAddress);
+            Thread.sleep(20);
+        }
+    }
+
+    public void sendMessage(String ip, int port, byte[] message) throws IOException {
+        DatagramChannel datagramChannel = DatagramChannel.open();
+        datagramChannel.bind(null);
+
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(message);
         datagramChannel.send(byteBuffer, inetSocketAddress);
 
     }
@@ -97,20 +111,32 @@ public class Sender {
         List<byte[]> listOfByteArrays = new ArrayList<>();
         for (int i = 0; i < dataz.length; i++) {
             if (i % BUF_SIZE == 0) {
-                currentByteArray = new byte[BUF_SIZE];
+                int arrSize = dataz.length - i >= BUF_SIZE ? BUF_SIZE : dataz.length - i;
+                currentByteArray = new byte[arrSize];
                 listOfByteArrays.add(currentByteArray);
             }
             currentByteArray[i % BUF_SIZE] = dataz[i];
         }
 
-        // for (byte[] bytes : listOfByteArrays) {
-        // mp.sendMessage(Constants.IP().getHostAddress(), Constants.MULTICAST_INTERFACE,
-        // Constants.PORT, bytes);
-        // }
+        try {
+            mp.sendLargeMessages(Constants.HOST, Constants.PORT, listOfByteArrays);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        // mp.sendMessage(MULTICAST_IP, MULTICAST_INTERFACE, MULTICAST_PORT, dataz);
-        mp.sendMessage(Constants.IP().getHostAddress(), Constants.MULTICAST_INTERFACE,
-                Constants.PORT, "Hello :D".getBytes());
+
+        byte[] end = new byte[4 + 3]; // 69, 78, 68
+        byte[] len = intToBytes(dataz.length);
+        end[0] = 69;
+        end[1] = 78;
+        end[2] = 68;
+        end[3] = len[0];
+        end[4] = len[1];
+        end[5] = len[2];
+        end[6] = len[3];
+
+        mp.sendMessage(Constants.HOST, Constants.PORT, end);
     }
+
 
 }

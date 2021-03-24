@@ -3,14 +3,12 @@ package com.ivan.app.temp;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.nio.channels.MembershipKey;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -93,32 +91,37 @@ public class Receiver {
 
     }
 
-    private static final String MULTICAST_INTERFACE = Constants.MULTICAST_INTERFACE;
-    private static final int MULTICAST_PORT = Constants.PORT;
-    private static final String MULTICAST_IP = Constants.HOST;
 
-    private byte[] receiveMessage(String ip, String iface, int port) throws IOException {
+    private byte[] receiveMessage(String ip, int port) throws IOException {
         DatagramChannel datagramChannel = DatagramChannel.open(StandardProtocolFamily.INET);
-        NetworkInterface networkInterface = NetworkInterface.getByName(iface);
         datagramChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         datagramChannel.bind(new InetSocketAddress(port));
-        datagramChannel.setOption(StandardSocketOptions.IP_MULTICAST_IF, networkInterface);
-        InetAddress inetAddress = InetAddress.getByName(ip);
-        MembershipKey membershipKey = datagramChannel.join(inetAddress, networkInterface);
-        System.out.println("Waiting for the message...");
         ByteBuffer byteBuffer = ByteBuffer.allocate(Constants.BUF_SIZE);
         datagramChannel.receive(byteBuffer);
         byteBuffer.flip();
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes, 0, byteBuffer.limit());
-        membershipKey.drop();
         return bytes;
     }
 
     public static void main(String[] args) throws IOException {
         Receiver mr = new Receiver();
-        byte[] data = mr.receiveMessage(MULTICAST_IP, MULTICAST_INTERFACE, MULTICAST_PORT);
-        System.out.println("Message received : " + new String(data));
+        List<byte[]> byteArrays = new LinkedList<>();
+
+        while (true) {
+            byte[] data = mr.receiveMessage(Constants.HOST, Constants.PORT);
+            boolean isEnd = data[0] == 69 && data[1] == 78 && data[2] == 68;
+            if (isEnd) {
+
+                saveImageData(data, byteArrays);
+                break;
+            }
+
+            byteArrays.add(data);
+
+        }
+
+        // System.out.println("Message received : " + new String(data));
     }
 
 }
